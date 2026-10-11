@@ -1,0 +1,328 @@
+@import "./fonts.css";
+@import "tailwindcss";
+
+/* Design tokens. Every colour and type size in the posts and their figures comes
+   from here; the figures reference them as var(--color-…) so a change lands
+   everywhere at once. */
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-source-serif), Georgia, "Times New Roman", serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+
+  --color-paper: #f7f6f3;
+  --color-paper-raised: #fcfbf9;
+  --color-paper-sunk: #efeeea;
+  --color-ink: #141416;
+  --color-ink-muted: #5c5c63;
+  --color-ink-faint: #6b6b74;
+  --color-rule: #dfddd7;
+  --color-rule-strong: #c9c6be;
+  --color-accent: #2b4a9f;
+  --color-accent-deep: #1e3576;
+  --color-accent-soft: #e1e6f3;
+  /* Series colours for charts, in the order a figure should reach for them. */
+  --color-s1: #141416;
+  --color-s2: #64748b;
+  --color-s3: #2b4a9f;
+  --color-s4: #0e8f80;
+  --color-s5: #94690f;
+  --color-s6: #8f2916;
+
+  --text-display: clamp(2.6rem, 1.1rem + 5vw, 5.25rem);
+  --text-h2: clamp(1.95rem, 1.15rem + 2.5vw, 3.1rem);
+  --ease-out-quint: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  --font-geist-sans: "Geist", "Geist Fallback";
+  --font-geist-mono: "Geist Mono", "Geist Mono Fallback";
+  --font-source-serif: "Source Serif 4", "Source Serif 4 Fallback";
+}
+
+@utility prose-measure {
+  max-width: 66ch;
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 5.5rem;
+  }
+
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-paper-raised);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+}
+
+@layer components {
+  /* ---- Reveal: blocks fade up as they scroll into view -------------------------
+     Only when scripting runs (Post.astro adds .js to <html> before first paint), so
+     a reader without JS, or a crawler, sees everything at once. */
+  .js [data-reveal] {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 620ms var(--ease-out-quint) var(--reveal-delay, 0ms),
+      transform 620ms var(--ease-out-quint) var(--reveal-delay, 0ms);
+  }
+  .js [data-reveal].is-revealed {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    :before,
+    :after {
+      transition-duration: 0.001ms !important;
+      transition-delay: 0s !important;
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      animation-delay: 0s !important;
+    }
+  }
+
+  /* ---- Post body -----------------------------------------------------------------
+     Styling for what Markdown produces inside the authoring components, so the
+     .mdx stays plain Markdown: **bold**, _italic_, [links](…) and `inline code`
+     (which renders as a highlighted number, e.g. `110 ns`). */
+  .post-prose {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--color-ink-muted);
+  }
+  .post-prose > * + * {
+    margin-top: 1.25rem;
+  }
+  .post-prose :where(b, strong) {
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  .post-prose :where(a) {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-decoration-color: var(--color-rule-strong);
+    text-underline-offset: 4px;
+    transition: color 150ms, text-decoration-color 150ms;
+  }
+  .post-prose :where(a):hover {
+    color: var(--color-accent);
+    text-decoration-color: var(--color-accent);
+  }
+  :where(.post-prose, .figure-body) :where(code) {
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    color: var(--color-ink);
+  }
+  .post-prose :where(ul) {
+    list-style: disc;
+    padding-left: 1.25rem;
+  }
+  .post-prose :where(ol) {
+    list-style: decimal;
+    padding-left: 1.25rem;
+  }
+  .post-prose :where(li + li) {
+    margin-top: 0.5rem;
+  }
+
+  /* ---- Section grid ------------------------------------------------------------
+     A section body is one 12-column grid. Prose takes the left five columns and a
+     Figure the right seven, so writing <Prose> then <Figure> puts them side by
+     side; anything else (sub-headings, rules, callouts) takes a full row. */
+  .section-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    column-gap: 3.5rem;
+    row-gap: 3rem;
+  }
+  @media (min-width: 64rem) {
+    .section-grid {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      row-gap: 2rem;
+    }
+    .section-grid > * {
+      grid-column: 1 / -1;
+    }
+    .section-grid > .col-prose {
+      grid-column: 1 / span 5;
+    }
+    .section-grid > .col-figure {
+      grid-column: 6 / span 7;
+    }
+    /* The figure stays in view while its prose scrolls past. */
+    .col-figure > * {
+      position: sticky;
+      top: 1.5rem;
+    }
+  }
+  .section-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  /* `---` in a section draws the rule that separates two runs of rows. */
+  .section-grid > hr {
+    border: 0;
+    border-top: 1px solid var(--color-rule);
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ---- Figure body ---------------------------------------------------------------
+     Inside <Figure>, the drawing (an island or any element) gets plate padding and
+     each Markdown paragraph after it becomes the caption strip. */
+  .figure-body > :not(p, ul, ol, script, style, template) {
+    display: block;
+    padding: 1rem 0.75rem;
+  }
+  @media (min-width: 40rem) {
+    .figure-body > :not(p, ul, ol, script, style, template) {
+      padding: 1.25rem 1.25rem;
+    }
+  }
+  .figure-body > :is(p, ul, ol) {
+    border-top: 1px solid var(--color-rule);
+    padding: 0.75rem 1rem;
+    font-size: 12.5px;
+    line-height: 1.625;
+    color: var(--color-ink-muted);
+  }
+  .figure-body > :is(p, ul, ol) + :is(p, ul, ol) {
+    border-top: 0;
+    padding-top: 0;
+  }
+  @media (min-width: 40rem) {
+    .figure-body > :is(p, ul, ol) {
+      padding-left: 1.25rem;
+      padding-right: 1.25rem;
+    }
+  }
+  .figure-body :where(b, strong) {
+    font-weight: 700;
+  }
+  .figure-body :where(a) {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-decoration-color: var(--color-rule-strong);
+    text-underline-offset: 4px;
+  }
+
+  /* A Markdown table used as a figure's drawing. (Padding does not apply to a
+     collapsed-border table, so it is inset with margins instead.) */
+  .figure-body > table {
+    display: table;
+    margin: 1rem 0.75rem;
+    padding: 0;
+    width: calc(100% - 1.5rem);
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  @media (min-width: 40rem) {
+    .figure-body > table {
+      margin: 1.25rem;
+      padding: 0;
+      width: calc(100% - 2.5rem);
+    }
+  }
+  .figure-body > table th {
+    border-bottom: 1px solid var(--color-rule-strong);
+    padding: 0.5rem 0.75rem 0.5rem 0;
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-ink-faint);
+  }
+  .figure-body > table td {
+    border-bottom: 1px solid var(--color-rule);
+    padding: 0.625rem 0.75rem 0.625rem 0;
+    vertical-align: middle;
+    color: var(--color-ink-muted);
+  }
+  .figure-body > table tr:last-child td {
+    border-bottom: 0;
+  }
+  .figure-body > table td:first-child {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  .post-prose-tight > * + * {
+    margin-top: 1rem;
+  }
+
+  /* Every other section sits on the darker paper. */
+  main > section.post-section:nth-of-type(even) {
+    background: var(--color-paper-sunk);
+  }
+
+  /* Reference lists in Sources: <RefList title="…"> around a Markdown list. */
+  .ref-list ul {
+    margin-top: 0.75rem;
+  }
+  .ref-list li {
+    font-size: 13.5px;
+    line-height: 1.375;
+    color: var(--color-ink);
+  }
+  .ref-list li + li {
+    margin-top: 0.625rem;
+  }
+  .ref-list a {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-decoration-color: var(--color-rule-strong);
+    text-underline-offset: 4px;
+    transition: color 150ms, text-decoration-color 150ms;
+  }
+  .ref-list a:hover {
+    color: var(--color-accent);
+    text-decoration-color: var(--color-accent);
+  }
+}
+
+/* Astro styles islands `display: contents` with an unlayered rule, which would
+   beat the layered plate padding above. A drawing in a figure needs a box. */
+.figure-body > astro-island {
+  display: block;
+}

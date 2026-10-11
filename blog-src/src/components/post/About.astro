@@ -1,0 +1,78 @@
+---
+// The closing "About" block: Markdown on the left, and a "Cite this post" box
+// generated from front matter (title, authors, date, cite.key, cite.note).
+//
+//   <About>
+//
+//   Written by …
+//
+//   </About>
+import { joinNames } from '@/lib/people';
+
+interface Props {
+  toc?: string;
+}
+const { toc = 'About' } = Astro.props;
+const post = Astro.locals.post;
+const names = post.people.map((p) => p.name);
+const year = post.datePublished.slice(0, 4);
+const month = new Date(post.datePublished).toLocaleString('en-US', { month: 'long', timeZone: 'UTC' });
+const fullTitle = `${post.title}: ${post.subtitle}`;
+const citation = `${joinNames(names)}. "${fullTitle}." kstark007.github.io, ${month} ${year}.`;
+const bibtex = `@misc{${post.cite.key},
+  title  = {${fullTitle}},
+  author = {${names.join(' and ')}},
+  year   = {${year}},
+  url    = {${post.url}},
+  note   = {${post.cite.note}}
+}`;
+---
+
+<footer id="about" data-toc={toc} class="scroll-mt-20 bg-paper-sunk py-20 sm:py-24">
+  <div class="mx-auto w-full max-w-6xl px-5 sm:px-8">
+    <div data-reveal>
+      <h2 class="font-serif text-[length:var(--text-h2)] leading-[1.06] font-normal tracking-[-0.015em] text-balance text-ink">About</h2>
+    </div>
+    <div class="mt-8 grid min-w-0 grid-cols-1 gap-10 lg:grid-cols-2">
+      <div class="min-w-0" data-reveal>
+        <div class="post-prose prose-measure">
+          <slot />
+        </div>
+      </div>
+      <div class="min-w-0" data-reveal>
+        <div class="min-w-0 border border-rule bg-paper-raised p-6">
+          <h3 class="font-mono text-[11px] tracking-[0.16em] text-ink-faint uppercase">Cite this post</h3>
+          <p class="mt-3 font-serif text-[0.95rem] leading-relaxed text-ink-muted">{citation}</p>
+          <div class="mt-4">
+            <pre class="max-w-full overflow-x-auto border border-rule bg-paper-sunk p-4 font-mono text-[11px] leading-relaxed text-ink-muted" data-bibtex>{bibtex}</pre>
+            <button
+              type="button"
+              data-copy-bibtex
+              class="mt-3 rounded-sm border border-rule-strong px-4 py-1.5 font-mono text-[11.5px] text-ink transition-colors hover:border-ink hover:text-accent"
+            >
+              Copy BibTeX
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  import { track } from '@/lib/analytics';
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-copy-bibtex]')) {
+    const text = button.parentElement?.querySelector('[data-bibtex]')?.textContent ?? '';
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(text);
+        button.textContent = 'Copied ✓';
+        track('citation_copied');
+        setTimeout(() => (button.textContent = 'Copy BibTeX'), 1600);
+      } catch {
+        /* clipboard unavailable: the BibTeX is still selectable */
+      }
+    });
+  }
+</script>

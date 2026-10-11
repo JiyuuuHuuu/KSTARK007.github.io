@@ -1,0 +1,24 @@
+---
+// A shaded, always-open note that takes a full row, e.g. a results summary.
+//
+//   <Callout title="Prism’s results">
+//
+//   Markdown.
+//
+//   </Callout>
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+
+<div class="mt-4 max-w-3xl">
+  <div data-reveal>
+    <div class="border-l-2 border-accent bg-accent-soft/45 py-4 pr-4 pl-5">
+      <p class="font-mono text-[10.5px] tracking-[0.14em] text-accent uppercase">{title}</p>
+      <div class="post-prose prose-measure mt-2 leading-[1.6] text-ink">
+        <slot />
+      </div>
+    </div>
+  </div>
+</div>

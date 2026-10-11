@@ -1,0 +1,20 @@
+---
+// A block of body text: the left column of a section row.
+//
+//   <Prose>
+//
+//   Markdown paragraphs. `110 ns` renders as a highlighted number.
+//
+//   </Prose>
+//
+// Leave a blank line after <Prose> and before </Prose>, or Markdown inside it
+// is not parsed as paragraphs.
+---
+
+<div class="col-prose">
+  <div data-reveal>
+    <div class="post-prose prose-measure">
+      <slot />
+    </div>
+  </div>
+</div>

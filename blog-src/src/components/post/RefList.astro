@@ -1,0 +1,19 @@
+---
+// A titled group of references, around a plain Markdown list:
+//
+//   <RefList title="CXL and hardware">
+//
+//   - [Author. Title. Venue, Year](https://…)
+//   - A reference with no working link is just text
+//
+//   </RefList>
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+
+<div data-reveal class="ref-list">
+  <h3 class="font-mono text-[11px] tracking-[0.16em] text-ink-faint uppercase">{title}</h3>
+  <slot />
+</div>

@@ -15,11 +15,13 @@ cannot drift the way a hand-maintained literal does. The copies committed here
 are what the last run produced; the deployed copies are regenerated.
 
 To test it without deploying, run it against a scratch copy — it rewrites files
-in place:
+in place. Build the `blog-src/` posts first, as the deploy does, since the script
+reads their pages:
 
 ```sh
-rsync -a --exclude=.git ./ /tmp/site-test/ && cp -R .git /tmp/site-test/.git
-cd /tmp/site-test && python3 .github/scripts/stamp_dates.py
+rsync -a --exclude=.git --exclude=node_modules ./ /tmp/site-test/ && cp -R .git /tmp/site-test/.git
+cd /tmp/site-test/blog-src && npm ci && npm run build && cd ..
+python3 .github/scripts/stamp_dates.py
 ```
 
 ## IndexNow
@@ -49,9 +51,18 @@ otherwise be a second, unreadable copy of the post.
 
 ## Blog posts
 
-A post is either a single HTML file in `blog/`, or a self-contained static export
-in `blog/<slug>/`. The one export here is built from a separate repository and
-copied in wholesale:
+A post is a single HTML file in `blog/`, a post built from `blog-src/`, or a
+self-contained static export in `blog/<slug>/` copied in from elsewhere.
+
+**Built from `blog-src/`** (currently `one-memory-many-machines`): an Astro + MDX
+project in this repo. The prose is in `blog-src/src/content/posts/<slug>/index.mdx`,
+the figure data in `data.ts` next to it, and the animated figures in
+`blog-src/src/figures/<slug>/`. The deploy builds these into `blog/<slug>/`,
+which is gitignored: never edit or copy files into it. See `blog-src/README.md`
+for how to edit, preview (`npm run dev`) and add a post.
+
+**Exported elsewhere** (currently `agentic-coding-in-the-wild`): built from a
+separate repository and copied in wholesale:
 
 ```sh
 cd ../agentic_workload_analysis_website

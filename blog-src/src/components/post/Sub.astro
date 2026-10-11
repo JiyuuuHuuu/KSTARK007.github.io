@@ -1,0 +1,20 @@
+---
+// A sub-heading inside a <Section>, with a rule above it. Takes a full row.
+//
+//   <Sub id="shared-memory" title="CXL 3.0: cross-host sharing" deck="…" />
+interface Props {
+  id?: string;
+  title: string;
+  deck?: string;
+}
+const { id, title, deck } = Astro.props;
+---
+
+<div data-reveal class="mb-4">
+  <div class="mt-4 border-t border-rule pt-14">
+    <h3 id={id} class="scroll-mt-20 font-serif text-[1.7rem] leading-[1.06] font-normal tracking-[-0.015em] text-balance text-ink">
+      {title}
+    </h3>
+    {deck && <p class="prose-measure mt-5 font-serif text-[1.075rem] leading-[1.62] text-ink-muted">{deck}</p>}
+  </div>
+</div>

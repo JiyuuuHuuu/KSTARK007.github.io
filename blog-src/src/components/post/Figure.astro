@@ -1,0 +1,67 @@
+---
+// A figure plate: the right column of a section row.
+//
+//   <Figure title="Two ways out of the socket" source="PCI-SIG" alt="Text for screen readers…"
+//           numbers={D.SOME_TABLE}>
+//     <PinStory client:visible />
+//
+//     The caption, in Markdown. Every paragraph after the drawing is caption.
+//   </Figure>
+//
+// The drawing is usually an animated component from src/figures/<slug>/, but a
+// Markdown table or plain HTML works too. `numbers` adds a collapsed
+// "Show the numbers" table (see src/lib/table.ts).
+import type { NumbersTable } from '@/lib/table';
+
+interface Props {
+  title: string;
+  /** Short source line in the corner, e.g. "Megalon, Figure 1(c)". */
+  source?: string;
+  /** What the figure shows, for screen readers and the Markdown copy. */
+  alt: string;
+  numbers?: NumbersTable;
+  id?: string;
+}
+const { title, source, alt, numbers, id } = Astro.props;
+---
+
+<div class="col-figure">
+  <div data-reveal>
+    <figure id={id} class="post-figure border border-rule bg-paper-raised">
+      <figcaption class="flex items-baseline justify-between gap-4 border-b border-rule px-4 py-2.5 sm:px-5">
+        <h3 class="text-[12.5px] leading-tight font-medium text-ink">{title}</h3>
+        {source && <span class="shrink-0 font-mono text-[10.5px] tracking-wide text-ink-faint">{source}</span>}
+      </figcaption>
+      <div class="figure-body">
+        <slot />
+      </div>
+      {numbers && (
+        <details class="figure-numbers border-t border-rule">
+          <summary class="cursor-pointer px-4 py-2.5 font-mono text-[10.5px] tracking-[0.1em] text-ink-faint uppercase transition-colors hover:text-accent sm:px-5">
+            Show the numbers
+          </summary>
+          <div class="overflow-x-auto px-4 pb-4 sm:px-5">
+            <table class="w-full border-collapse text-[12px]">
+              <caption class="sr-only">{title}</caption>
+              <thead>
+                <tr class="border-b border-rule-strong text-left font-mono text-[10px] tracking-[0.08em] text-ink-faint uppercase">
+                  {numbers.columns.map((c) => <th scope="col" class="py-2 pr-3 last:pr-0">{c}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {numbers.rows.map((row) => (
+                  <tr class="border-b border-rule last:border-0">
+                    {row.map((cell, i) => (
+                      <td class:list={['py-2 pr-3 last:pr-0', i === 0 ? 'text-ink' : 'font-mono tabular text-ink-muted']}>{cell}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      )}
+      <p class="figure-alt sr-only">{alt}</p>
+    </figure>
+  </div>
+</div>

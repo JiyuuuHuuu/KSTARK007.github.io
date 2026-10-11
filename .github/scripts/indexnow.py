@@ -26,7 +26,7 @@ import urllib.request
 import xml.dom.minidom
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from stamp_dates import SITE, SITEMAP, site_url  # noqa: E402
+from stamp_dates import SITE, SITEMAP, built_post_url, site_url  # noqa: E402
 
 ENDPOINT = "https://api.indexnow.org/indexnow"
 KEY = "ff93bf625b094e4f9ba2f616af28cebe"
@@ -73,13 +73,15 @@ def urls_for(paths, known):
 
     Deliberately narrow: a path counts only if it maps to a URL the sitemap
     already lists. A changed JS chunk or an edited script is not a page, and an
-    exported post's asset should not re-announce the post.
+    exported post's asset should not re-announce the post. A post built from
+    blog-src/ never appears in the diff itself, so a change to its sources
+    stands in for it.
     """
     found = set()
     for path in paths:
-        url = site_url(path)
-        if url in known:
-            found.add(url)
+        for url in (site_url(path), built_post_url(path)):
+            if url in known:
+                found.add(url)
     return found
 
 

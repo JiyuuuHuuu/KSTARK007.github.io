@@ -1,0 +1,13 @@
+---
+// The post page. Which post is decided at build time by POST_SLUG.
+import Post from '@/layouts/Post.astro';
+import { loadPost } from '@/lib/post';
+
+const { meta, Content } = await loadPost();
+// Components read the post's front matter from here (Hero, About, Head, …).
+Astro.locals.post = meta;
+---
+
+<Post>
+  <Content />
+</Post>

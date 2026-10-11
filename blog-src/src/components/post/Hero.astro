@@ -1,0 +1,102 @@
+---
+// The masthead. Title, byline and the paper list come from front matter; the
+// lede is the Markdown inside <Hero>, and the drawing goes in slot="figure".
+//
+//   <Hero actions={[{ label: 'Start reading', href: '#intro' }]}>
+//     One-paragraph lede.
+//     <HeroFigure slot="figure" client:visible />
+//   </Hero>
+import { joinNames } from '@/lib/people';
+import { SITE } from '@/lib/post';
+
+interface Action {
+  label: string;
+  href: string;
+  /** Analytics name for the click; defaults to the label. */
+  track?: string;
+}
+interface Props {
+  actions?: Action[];
+}
+
+const { actions = [] } = Astro.props;
+const post = Astro.locals.post;
+const link =
+  'underline decoration-rule-strong underline-offset-4 transition-colors duration-200 hover:text-accent hover:decoration-accent';
+const owner = post.people[0];
+---
+
+<header class="relative overflow-hidden pt-14 pb-8 sm:pt-20 sm:pb-10">
+  <div class="mx-auto w-full max-w-[76rem] px-5 sm:px-8">
+    <nav aria-label="Breadcrumb" class="mb-8 sm:mb-10">
+      <ol class="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[11.5px] tracking-wide text-ink-faint">
+        <li><a href={SITE} class={link} data-track="breadcrumb-home">{owner.name}</a></li>
+        <li aria-hidden="true">/</li>
+        <li><a href={`${SITE}blog/`} class={link} data-track="breadcrumb-blog">Blog</a></li>
+        <li aria-current="page" class="text-ink-muted"><span aria-hidden="true" class="mr-2">/</span>{post.title}</li>
+      </ol>
+    </nav>
+
+    <div class="grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
+      <div class="lg:col-span-7">
+        <div data-reveal>
+          <h1 class="font-serif text-[length:var(--text-display)] leading-[0.94] font-normal tracking-[-0.028em] text-balance text-ink">
+            {post.title}
+          </h1>
+        </div>
+        <div data-reveal data-md="lede" style="--reveal-delay:80ms" class="mt-7 max-w-[46ch] font-serif text-[1.15rem] leading-[1.5] text-ink-muted sm:text-[1.3rem]">
+          <slot />
+        </div>
+        {actions.length > 0 && (
+          <div data-reveal style="--reveal-delay:190ms">
+            <div class="mt-9 flex flex-wrap items-center gap-3">
+              {actions.map((a, i) => (
+                <a
+                  href={a.href}
+                  data-track={a.track ?? a.label}
+                  class={
+                    i === 0
+                      ? 'rounded-sm bg-ink px-5 py-2.5 text-[13.5px] font-medium text-paper-raised transition-transform duration-200 hover:bg-accent active:translate-y-px'
+                      : 'rounded-sm border border-rule-strong px-5 py-2.5 text-[13.5px] font-medium text-ink transition-colors duration-200 hover:border-ink hover:text-accent active:translate-y-px'
+                  }
+                >
+                  {a.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+      <div class="lg:col-span-5">
+        <div data-reveal style="--reveal-delay:120ms">
+          <slot name="figure" />
+        </div>
+      </div>
+    </div>
+
+    <div data-reveal>
+      <div class="mt-12 border-t border-ink pt-5">
+        <p class="font-serif text-[1.15rem] leading-tight text-ink">
+          Blog by{' '}
+          {post.people.map((p, i) => (
+            <span>
+              {i === 0 ? '' : i === post.people.length - 1 ? ' and ' : ', '}
+              <a href={p.url} class={link}>{p.name}</a>
+            </span>
+          ))}
+        </p>
+        <div class="mt-3 max-w-[92ch] font-serif text-[15px] leading-relaxed text-ink-muted">
+          <p>{post.basedOn}</p>
+          {post.papers.map((paper) => (
+            <p class="mt-2">
+              <a href={paper.read} class={link}><i class="text-ink">{paper.title}</i></a>{' '}
+              ({[paper.venue, paper.note].filter(Boolean).join(', ')})<br />
+              {joinNames(paper.authors.map((a) => a.name))}
+            </p>
+          ))}
+        </div>
+        <p class="mt-2 text-[12.5px] leading-relaxed text-ink-faint">{post.affiliations}</p>
+      </div>
+    </div>
+  </div>
+</header>

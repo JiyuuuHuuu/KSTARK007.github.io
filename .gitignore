@@ -11,9 +11,14 @@ reference/
 # Ignore the Gemfile that is generated
 Gemfile.lock
 
-# Ingore files created by npm
+# npm. blog-src/package-lock.json is committed: CI installs from it (npm ci).
 node_modules
-package-lock.json
+blog-src/dist/
+blog-src/.astro/
+
+# Posts built from blog-src/ by `npm run build` (and by CI on every deploy).
+# They are build output; edit blog-src/ instead. One line per built post.
+blog/one-memory-many-machines/
 
 # Source archives dropped under blog/ while preparing a post. Everything under
 # blog/ is published verbatim, so an archive left here would be served to the

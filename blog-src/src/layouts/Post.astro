@@ -1,0 +1,26 @@
+---
+// Page shell for a post. Everything visible comes from the post's .mdx (via the
+// default slot); the shell adds <head>, the section navigation, the analytics
+// consent banner and the two page-wide behaviours in src/scripts/page.ts.
+import Head from '@/components/site/Head.astro';
+import Toc from '@/components/site/Toc';
+import ConsentBanner from '@/components/site/ConsentBanner';
+import '@/styles/global.css';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <Head />
+  </head>
+  <body>
+    <Toc client:load />
+    <main id="main">
+      <slot />
+    </main>
+    <ConsentBanner client:idle />
+    <script>
+      import '@/scripts/page';
+    </script>
+  </body>
+</html>

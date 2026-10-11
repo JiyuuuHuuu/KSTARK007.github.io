@@ -1,0 +1,42 @@
+---
+// A numbered section of the post. Its body is a grid: <Prose> and <Figure>
+// written one after the other sit side by side; <Sub>, `---`, <Callout> and
+// anything else take a full row. Sections alternate background automatically.
+//
+//   <Section id="intro" toc="Intro" title="1. Intro" deck="One-line summary">
+//     …
+//   </Section>
+interface Props {
+  /** Anchor for links (#id). Keep it stable: external links point at it. */
+  id: string;
+  title: string;
+  /** Sentence under the heading. */
+  deck?: string;
+  /** Label in the section navigation. Omit to leave the section out of it. */
+  toc?: string;
+  /** Small caps line above the heading, e.g. "Paper one · OSDI 2026". */
+  kicker?: string;
+  /** Narrower page width, with everything stacked in one column (for text-only sections such as Sources). */
+  narrow?: boolean;
+}
+const { id, title, deck, toc, kicker, narrow = false } = Astro.props;
+---
+
+<section id={id} data-toc={toc} class="post-section scroll-mt-20 py-20 sm:py-28">
+  <div class:list={['mx-auto w-full px-5 sm:px-8', narrow ? 'max-w-6xl' : 'max-w-[76rem]']}>
+    {kicker && (
+      <div data-reveal>
+        <p class="font-mono text-[11px] tracking-[0.16em] text-accent uppercase">{kicker}</p>
+      </div>
+    )}
+    <div data-reveal>
+      <h2 class="font-serif text-[length:var(--text-h2)] leading-[1.06] font-normal tracking-[-0.015em] text-balance text-ink">
+        {title}
+      </h2>
+      {deck && <p class="prose-measure mt-5 font-serif text-[1.075rem] leading-[1.62] text-ink-muted">{deck}</p>}
+    </div>
+    <div class:list={[narrow ? "section-stack" : "section-grid", "mt-12"]}>
+      <slot />
+    </div>
+  </div>
+</section>

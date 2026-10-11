@@ -1,0 +1,42 @@
+---
+// A collapsible aside (a native <details>, so it works without JavaScript).
+//
+//   <Fold summary="Background · Cache coherence" hint="expand if new to CPU caches">
+//
+//   Markdown paragraphs.
+//
+//   </Fold>
+//
+// Put it inside <Prose> to attach it to that text, or directly in a <Section>
+// to give it a row of its own. variant="recap" is the shaded box for readers
+// who skipped ahead.
+interface Props {
+  summary: string;
+  /** Faded text after the summary, e.g. "expand if new to CPU caches". */
+  hint?: string;
+  variant?: 'aside' | 'recap';
+  open?: boolean;
+}
+const { summary, hint, variant = 'aside', open = false } = Astro.props;
+---
+
+<div class="col-prose fold">
+  {variant === 'recap' ? (
+    <details open={open} class="fold-recap border-l-2 border-accent bg-accent-soft/45 py-4 pr-4 pl-5">
+      <summary class="cursor-pointer font-mono text-[10.5px] tracking-[0.14em] text-accent uppercase">{summary}</summary>
+      <div class="post-prose prose-measure mt-2 leading-[1.6] text-ink">
+        <slot />
+      </div>
+    </details>
+  ) : (
+    <details open={open}>
+      <summary class="cursor-pointer font-mono text-[11px] tracking-[0.16em] text-accent uppercase">
+        {summary}
+        {hint && <span class="text-ink-faint"> · {hint}</span>}
+      </summary>
+      <div class="post-prose prose-measure mt-2">
+        <slot />
+      </div>
+    </details>
+  )}
+</div>

@@ -1,0 +1,48 @@
+---
+// "Sources of truth": the post's own papers and talks, from front matter.
+//
+//   <PaperSources />
+import { joinNames } from '@/lib/people';
+
+interface Props {
+  title?: string;
+}
+const { title = 'Sources of truth' } = Astro.props;
+const post = Astro.locals.post;
+---
+
+<div data-reveal>
+  <h3 class="font-mono text-[11px] tracking-[0.16em] text-accent uppercase">{title}</h3>
+  <ul class="mt-4 space-y-4">
+    {post.papers.map((p) => (
+      <li class="border-l-2 border-accent pl-4">
+        <p class="font-serif text-[1rem] leading-snug text-ink">
+          {p.title}. {p.venue}{p.note ? ` (${p.note})` : ''}.
+        </p>
+        <p class="mt-1 text-[12.5px] text-ink-muted">{p.authors.map((a) => a.name).join(', ')}</p>
+        {p.links.length > 0 && (
+          <p class="mt-1 flex flex-wrap gap-y-1">
+            {p.links.map((l, i) => (
+              <span class="inline-block font-mono text-[11.5px]">
+                {i > 0 && <span class="mx-2 text-ink-faint"> · </span>}
+                <a
+                  href={l.href}
+                  data-track={`source-${l.label}`}
+                  class="text-accent underline decoration-rule-strong underline-offset-4 hover:decoration-accent"
+                >
+                  {l.label}
+                </a>
+              </span>
+            ))}
+          </p>
+        )}
+      </li>
+    ))}
+    {post.talks.map((t) => (
+      <li class="border-l-2 border-accent pl-4">
+        <p class="font-serif text-[1rem] leading-snug text-ink">{t.title}. {t.venue}.</p>
+        <p class="mt-1 text-[12.5px] text-ink-muted">{joinNames(post.people.map((p) => p.name))}. {t.note}</p>
+      </li>
+    ))}
+  </ul>
+</div>
